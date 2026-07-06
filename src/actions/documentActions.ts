@@ -150,6 +150,8 @@ export async function importDocumentsFromExcel(base64Data: string) {
             return { success: false, error: 'Berkas yang diunggah kosong.' }
         }
 
+        const normalizeKey = (key: any) => String(key).toLowerCase().replace(/[^a-z0-9]/g, '').trim()
+
         const firstRow = rawRows[0]
         const headers = Object.keys(firstRow)
         let hasClientName = false
@@ -157,14 +159,14 @@ export async function importDocumentsFromExcel(base64Data: string) {
         let hasLangPair = false
 
         for (const header of headers) {
-            const h = header.toLowerCase().trim()
-            if (['nama_klien', 'nama klien', 'nama di dokumen', 'client_name', 'client name', 'klien'].includes(h)) {
+            const h = normalizeKey(header)
+            if (['namaklien', 'namadidokumen', 'clientname', 'klien'].includes(h)) {
                 hasClientName = true
             }
-            if (['tipe_dokumen', 'tipe dokumen', 'document_type', 'document type', 'tipe'].includes(h)) {
+            if (['tipedokumen', 'documenttype', 'tipe'].includes(h)) {
                 hasDocType = true
             }
-            if (['arah_bahasa', 'arah bahasa', 'pasangan bahasa', 'language_pair', 'language pair', 'bahasa'].includes(h)) {
+            if (['arahbahasa', 'pasanganbahasa', 'languagepair', 'bahasa'].includes(h)) {
                 hasLangPair = true
             }
         }
@@ -181,11 +183,44 @@ export async function importDocumentsFromExcel(base64Data: string) {
         const errors: string[] = []
 
         for (const row of rawRows) {
-            const regNum = (row['no_register'] || row['No Register'] || row['no_registrasi'] || row['No Registrasi'] || row['registration_number'] || '').toString().trim() || generateRegNumber()
-            const rawDate = row['tanggal'] || row['Tanggal'] || row['date'] || row['Date'] || row['document_date']
-            const docType = (row['tipe_dokumen'] || row['Tipe Dokumen'] || row['document_type'] || row['Document Type'] || row['tipe'] || 'Dokumen Terjemahan').toString().trim()
-            const langPair = (row['arah_bahasa'] || row['Arah Bahasa'] || row['language_pair'] || row['Language Pair'] || row['bahasa'] || 'N/A').toString().trim()
-            const clientName = (row['nama_klien'] || row['Nama Klien'] || row['client_name'] || row['Client Name'] || row['klien'] || 'N/A').toString().trim()
+            // Normalize row keys
+            const normalizedRow: any = {}
+            for (const [k, v] of Object.entries(row)) {
+                normalizedRow[normalizeKey(k)] = v
+            }
+
+            const regNum = (
+                normalizedRow['noregister'] || 
+                normalizedRow['noregistrasi'] || 
+                normalizedRow['nomorregistrasi'] || 
+                normalizedRow['registrationnumber'] || 
+                ''
+            ).toString().trim() || generateRegNumber()
+
+            const rawDate = normalizedRow['tanggal'] || normalizedRow['tanggaldokumen'] || normalizedRow['date'] || normalizedRow['documentdate']
+            
+            const docType = (
+                normalizedRow['tipedokumen'] || 
+                normalizedRow['documenttype'] || 
+                normalizedRow['tipe'] || 
+                'Dokumen Terjemahan'
+            ).toString().trim()
+
+            const langPair = (
+                normalizedRow['arahbahasa'] || 
+                normalizedRow['pasanganbahasa'] || 
+                normalizedRow['languagepair'] || 
+                normalizedRow['bahasa'] || 
+                'N/A'
+            ).toString().trim()
+
+            const clientName = (
+                normalizedRow['namaklien'] || 
+                normalizedRow['namadidokumen'] || 
+                normalizedRow['clientname'] || 
+                normalizedRow['klien'] || 
+                'N/A'
+            ).toString().trim()
 
             const docDate = parseExcelDate(rawDate)
 
