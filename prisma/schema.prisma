@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id               String     @id @default(uuid())
+  email            String     @unique
+  password         String
+  name             String
+  skNumber         String
+  role             String     @default("TRANSLATOR")
+  languageServices String?
+  bio              String?
+  profilePicture   String?
+  documents        Document[]
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model Document {
+  id                 String   @id @default(uuid())
+  documentId         String   @unique // The 8-char random ID
+  registrationNumber String   @unique
+  documentDate       DateTime
+  documentType       String
+  languagePair       String
+  clientName         String
+  status             String   @default("Selesai")
+  isQrGenerated      Boolean  @default(false)
+  translatorId       String
+  translator         User     @relation(fields: [translatorId], references: [id], onDelete: Cascade)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
