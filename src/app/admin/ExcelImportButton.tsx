@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, useRef } from 'react'
-import { Upload, Loader2, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Upload, Loader2, AlertTriangle, CheckCircle, Download } from 'lucide-react'
 import { importDocumentsFromExcel } from '@/actions/documentActions'
 
 export default function ExcelImportButton() {
@@ -32,30 +32,46 @@ export default function ExcelImportButton() {
                 }
             })
         }
+        reader.onloadend = () => {
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+            }
+        }
         reader.readAsDataURL(file)
     }
 
     return (
-        <div className="relative">
-            <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept=".xlsx,.xls,.csv"
-                className="hidden"
-                id="excel-upload-input"
-            />
-            <label
-                htmlFor="excel-upload-input"
-                className={`flex items-center gap-2 border border-gray-200 hover:border-emerald-500 hover:text-emerald-700 bg-white text-gray-700 px-4 py-2 rounded-lg font-medium transition cursor-pointer ${isPending ? 'opacity-50 pointer-events-none' : ''}`}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <div className="relative">
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept=".xlsx,.xls,.csv"
+                    className="hidden"
+                    id="excel-upload-input"
+                />
+                <label
+                    htmlFor="excel-upload-input"
+                    className={`flex items-center gap-2 border border-gray-200 hover:border-emerald-500 hover:text-emerald-700 bg-white text-gray-700 px-4 py-2 rounded-lg font-medium transition cursor-pointer ${isPending ? 'opacity-50 pointer-events-none' : ''}`}
+                >
+                    {isPending ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                        <Upload className="w-5 h-5 text-gray-400" />
+                    )}
+                    <span>Impor Excel</span>
+                </label>
+            </div>
+            <a
+                href="/template-impor-dokumen.csv"
+                download
+                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 px-1 py-1"
+                title="Unduh template Excel/CSV yang benar"
             >
-                {isPending ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                    <Upload className="w-5 h-5 text-gray-400" />
-                )}
-                <span>Impor Excel</span>
-            </label>
+                <Download className="w-3.5 h-3.5" />
+                <span>Unduh Template</span>
+            </a>
 
             {result && (
                 <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">

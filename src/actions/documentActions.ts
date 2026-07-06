@@ -150,6 +150,32 @@ export async function importDocumentsFromExcel(base64Data: string) {
             return { success: false, error: 'Berkas yang diunggah kosong.' }
         }
 
+        const firstRow = rawRows[0]
+        const headers = Object.keys(firstRow)
+        let hasClientName = false
+        let hasDocType = false
+        let hasLangPair = false
+
+        for (const header of headers) {
+            const h = header.toLowerCase().trim()
+            if (['nama_klien', 'nama klien', 'nama di dokumen', 'client_name', 'client name', 'klien'].includes(h)) {
+                hasClientName = true
+            }
+            if (['tipe_dokumen', 'tipe dokumen', 'document_type', 'document type', 'tipe'].includes(h)) {
+                hasDocType = true
+            }
+            if (['arah_bahasa', 'arah bahasa', 'pasangan bahasa', 'language_pair', 'language pair', 'bahasa'].includes(h)) {
+                hasLangPair = true
+            }
+        }
+
+        if (!hasClientName || !hasDocType || !hasLangPair) {
+            return {
+                success: false,
+                error: 'Format kolom tidak sesuai template. Pastikan file memiliki kolom: Nama di Dokumen, Tipe Dokumen, dan Pasangan Bahasa.'
+            }
+        }
+
         let importedCount = 0
         let skippedCount = 0
         const errors: string[] = []
