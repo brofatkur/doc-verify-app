@@ -73,7 +73,11 @@ async function main() {
                 skNumber: '25004',
                 role: 'TRANSLATOR',
                 languageServices: 'Indonesia - Inggris, Inggris - Indonesia, Indonesia - Belanda, Belanda - Indonesia',
-                bio: 'AHU-55 AH.03.07.2022 Tanggal 5 Oktober 2022'
+                bio: 'AHU-55 AH.03.07.2022 Tanggal 5 Oktober 2022',
+                noSkKemenkum: 'AHU-55 AH.03.07.2022',
+                tglSk: '5 Oktober 2022',
+                masaAktif: 'Seumur Hidup',
+                skLengkap: 'AHU-55 AH.03.07.2022 Tanggal 5 Oktober 2022'
             },
             create: {
                 email: 'arifin@example.com',
@@ -82,7 +86,11 @@ async function main() {
                 skNumber: '25004',
                 role: 'TRANSLATOR',
                 languageServices: 'Indonesia - Inggris, Inggris - Indonesia, Indonesia - Belanda, Belanda - Indonesia',
-                bio: 'AHU-55 AH.03.07.2022 Tanggal 5 Oktober 2022'
+                bio: 'AHU-55 AH.03.07.2022 Tanggal 5 Oktober 2022',
+                noSkKemenkum: 'AHU-55 AH.03.07.2022',
+                tglSk: '5 Oktober 2022',
+                masaAktif: 'Seumur Hidup',
+                skLengkap: 'AHU-55 AH.03.07.2022 Tanggal 5 Oktober 2022'
             }
         })
 

@@ -50,7 +50,6 @@ export default function TranslatorImportButton() {
                 
                 let hasNoAnggota = false
                 let hasNamaPenerjemah = false
-                let hasEmail = false
 
                 for (const header of headers) {
                     const h = normalizeKey(header)
@@ -60,12 +59,9 @@ export default function TranslatorImportButton() {
                     if (['namapenerjemah', 'nama', 'fullname', 'name'].includes(h)) {
                         hasNamaPenerjemah = true
                     }
-                    if (['email', 'alamatemail'].includes(h)) {
-                        hasEmail = true
-                    }
                 }
 
-                setIsValidFormat(hasNoAnggota && hasNamaPenerjemah && hasEmail)
+                setIsValidFormat(hasNoAnggota && hasNamaPenerjemah)
                 setPreviewRows(parsedRows.slice(0, 5)) // show first 5 rows for preview
                 setShowPreview(true)
             } catch (err: any) {
@@ -160,18 +156,20 @@ export default function TranslatorImportButton() {
                                     </div>
 
                                     <div className="border border-slate-200/80 rounded-xl overflow-hidden shadow-inner">
-                                        <table className="w-full text-left text-xs">
+                                        <table className="w-full text-left text-[10px]">
                                             <thead className="bg-slate-100 border-b border-slate-200">
                                                 <tr>
-                                                    <th className="px-4 py-2.5 font-bold text-slate-500">No Anggota</th>
-                                                    <th className="px-4 py-2.5 font-bold text-slate-500">Nama Penerjemah</th>
-                                                    <th className="px-4 py-2.5 font-bold text-slate-500">Email</th>
-                                                    <th className="px-4 py-2.5 font-bold text-slate-500 font-medium">Arah Bahasa</th>
+                                                    <th className="px-3 py-2 font-bold text-slate-500">No Anggota</th>
+                                                    <th className="px-3 py-2 font-bold text-slate-500">Nama</th>
+                                                    <th className="px-3 py-2 font-bold text-slate-500">No SK Kemenkum</th>
+                                                    <th className="px-3 py-2 font-bold text-slate-500">Tanggal SK</th>
+                                                    <th className="px-3 py-2 font-bold text-slate-500">Arah Bahasa</th>
+                                                    <th className="px-3 py-2 font-bold text-slate-500">Masa Aktif</th>
+                                                    <th className="px-3 py-2 font-bold text-slate-500">SK Lengkap</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-100 bg-white">
                                                 {previewRows.map((row, i) => {
-                                                    // Map using normalizations
                                                     const normalize = (key: any) => String(key).toLowerCase().replace(/[^a-z0-9]/g, '').trim()
                                                     const keys = Object.keys(row)
                                                     
@@ -182,15 +180,22 @@ export default function TranslatorImportButton() {
 
                                                     const no = find(['noanggota', 'nomoranggota', 'membernumber']) || '-'
                                                     const name = find(['namapenerjemah', 'nama', 'fullname', 'name']) || '-'
-                                                    const email = find(['email', 'alamatemail']) || '-'
+                                                    const email = find(['email', 'alamatemail']) || `${no}@ippti.or.id`
+                                                    const noSk = find(['noskkemenkum', 'skkemenkumham', 'nomorsk', 'sk']) || '-'
+                                                    const tglSk = find(['tglsk', 'tanggalsk']) || '-'
                                                     const pair = find(['arahbahasa', 'pasanganbahasa']) || '-'
+                                                    const status = find(['masaaktif']) || '-'
+                                                    const skFull = find(['sklengkap', 'bio']) || '-'
 
                                                     return (
                                                         <tr key={i} className="hover:bg-slate-50/50">
-                                                            <td className="px-4 py-2.5 font-mono text-[10px] text-slate-700 truncate max-w-[100px]">{no}</td>
-                                                            <td className="px-4 py-2.5 text-slate-800 font-bold truncate max-w-[120px]">{name}</td>
-                                                            <td className="px-4 py-2.5 text-slate-600 truncate max-w-[130px] font-medium">{email}</td>
-                                                            <td className="px-4 py-2.5 text-slate-600 truncate max-w-[120px]">{pair}</td>
+                                                            <td className="px-3 py-2 font-mono text-[9px] text-slate-700 truncate max-w-[80px]">{no}</td>
+                                                            <td className="px-3 py-2 text-slate-800 font-bold truncate max-w-[100px]">{name}</td>
+                                                            <td className="px-3 py-2 text-slate-600 truncate max-w-[100px]">{noSk}</td>
+                                                            <td className="px-3 py-2 text-slate-650 truncate max-w-[80px]">{tglSk}</td>
+                                                            <td className="px-3 py-2 text-slate-600 truncate max-w-[90px]">{pair}</td>
+                                                            <td className="px-3 py-2 text-slate-550 truncate max-w-[70px]">{status}</td>
+                                                            <td className="px-3 py-2 text-slate-500 truncate max-w-[100px]">{skFull}</td>
                                                         </tr>
                                                     )
                                                 })}

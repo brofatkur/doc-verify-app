@@ -19,6 +19,10 @@ model User {
   languageServices String?
   bio              String?
   profilePicture   String?
+  noSkKemenkum     String?
+  tglSk            String?
+  masaAktif        String?
+  skLengkap        String?
   documents        Document[]
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt

@@ -180,7 +180,6 @@ export async function importTranslatorsFromExcel(base64Data: string) {
         const headers = Object.keys(firstRow)
         let hasNoAnggota = false
         let hasNamaPenerjemah = false
-        let hasEmail = false
 
         for (const header of headers) {
             const h = normalizeKey(header)
@@ -190,15 +189,12 @@ export async function importTranslatorsFromExcel(base64Data: string) {
             if (['namapenerjemah', 'nama', 'fullname', 'name'].includes(h)) {
                 hasNamaPenerjemah = true
             }
-            if (['email', 'alamatemail'].includes(h)) {
-                hasEmail = true
-            }
         }
 
-        if (!hasNoAnggota || !hasNamaPenerjemah || !hasEmail) {
+        if (!hasNoAnggota || !hasNamaPenerjemah) {
             return {
                 success: false,
-                error: 'Format kolom tidak sesuai template. Pastikan file memiliki kolom: No Anggota, Nama Penerjemah, dan Email.'
+                error: 'Format kolom tidak sesuai template. Pastikan file memiliki kolom: no_anggota dan nama_penerjemah.'
             }
         }
 
@@ -233,13 +229,20 @@ export async function importTranslatorsFromExcel(base64Data: string) {
                 normalizedRow['email'] || 
                 normalizedRow['alamatemail'] || 
                 ''
-            ).toString().trim()
+            ).toString().trim() || `${noAnggota}@ippti.or.id`
 
-            const sk = (
+            const noSkKemenkum = (
+                normalizedRow['noskkemenkum'] || 
                 normalizedRow['skkemenkumham'] || 
                 normalizedRow['nomorsk'] || 
                 normalizedRow['sk'] || 
-                'AHU-' + noAnggota
+                ''
+            ).toString().trim()
+
+            const tglSk = (
+                normalizedRow['tglsk'] || 
+                normalizedRow['tanggalsk'] || 
+                ''
             ).toString().trim()
 
             const arahBahasa = (
@@ -248,9 +251,26 @@ export async function importTranslatorsFromExcel(base64Data: string) {
                 ''
             ).toString().trim()
 
-            if (!noAnggota || !nama || !email) {
+            const masaAktif = (
+                normalizedRow['masaaktif'] || 
+                ''
+            ).toString().trim()
+
+            const urlFoto = (
+                normalizedRow['urlfoto'] || 
+                normalizedRow['profilepicture'] || 
+                ''
+            ).toString().trim()
+
+            const skLengkap = (
+                normalizedRow['sklengkap'] || 
+                normalizedRow['bio'] || 
+                ''
+            ).toString().trim()
+
+            if (!noAnggota || !nama) {
                 skippedCount++
-                errors.push(`Baris dilewati: Data No Anggota, Nama, atau Email kosong.`)
+                errors.push(`Baris dilewati: Data No Anggota atau Nama kosong.`)
                 continue
             }
 
@@ -278,7 +298,12 @@ export async function importTranslatorsFromExcel(base64Data: string) {
                         password: defaultPasswordHash,
                         role: 'TRANSLATOR',
                         languageServices: arahBahasa || null,
-                        bio: `Pernyataan verifikasi Kemenkumham: SK nomor ${sk}`,
+                        bio: skLengkap || `Pernyataan verifikasi Kemenkumham: SK nomor ${noSkKemenkum}`,
+                        noSkKemenkum: noSkKemenkum || null,
+                        tglSk: tglSk || null,
+                        masaAktif: masaAktif || null,
+                        skLengkap: skLengkap || null,
+                        profilePicture: urlFoto || null,
                     }
                 })
 

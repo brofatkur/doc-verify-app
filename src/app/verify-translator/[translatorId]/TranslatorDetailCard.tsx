@@ -12,6 +12,10 @@ interface TranslatorRecord {
     languageServices: string | null
     bio: string | null
     profilePicture: string | null
+    noSkKemenkum?: string | null
+    tglSk?: string | null
+    masaAktif?: string | null
+    skLengkap?: string | null
 }
 
 export default function TranslatorDetailCard({ translator }: { translator: TranslatorRecord }) {
@@ -80,7 +84,7 @@ export default function TranslatorDetailCard({ translator }: { translator: Trans
                         <div className="h-1.5 bg-emerald-600 rounded-full w-full"></div>
 
                         {/* Member Details Header */}
-                        <div className="space-y-1 pt-2">
+                        <div className="space-y-1 pt-2 text-left">
                             <span className="text-[11px] font-semibold text-amber-500 uppercase tracking-widest flex items-center gap-1">
                                 <Globe className="w-3.5 h-3.5" />
                                 <span>No. Anggota</span>
@@ -91,15 +95,51 @@ export default function TranslatorDetailCard({ translator }: { translator: Trans
                         </div>
 
                         {/* Statement Body */}
-                        <div className="text-slate-300 text-sm font-medium leading-relaxed pt-2">
+                        <div className="text-slate-300 text-sm font-medium leading-relaxed pt-2 space-y-3 text-left">
                             {lang === 'id' ? (
-                                <p>
-                                    Benar bahwa penerjemah tersumpah atas nama <strong className="text-white font-bold">{name}</strong> terdaftar resmi sebagai anggota IPPTI dan merupakan penerjemah tersumpah di bawah <strong className="text-white font-bold">Kementerian Hukum dan HAM</strong> sesuai SK nomor <strong className="text-white font-bold">{skDetails}</strong> dengan arah bahasa <strong className="text-white font-bold">{languages}</strong>.
-                                </p>
+                                <>
+                                    <p>
+                                        Benar bahwa penerjemah tersumpah atas nama <strong className="text-white font-bold">{name}</strong> terdaftar resmi sebagai anggota IPPTI dan merupakan penerjemah tersumpah di bawah <strong className="text-white font-bold">Kementerian Hukum dan HAM</strong> sesuai SK nomor <strong className="text-white font-bold">{translator.noSkKemenkum || skDetails}</strong> yang ditetapkan pada tanggal <strong className="text-white font-bold">{translator.tglSk || '5 Oktober 2022'}</strong>.
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-4 bg-slate-950/60 p-4 border border-slate-800 rounded-2xl text-xs mt-3">
+                                        <div>
+                                            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Arah Bahasa</p>
+                                            <p className="text-white font-semibold mt-1">{languages}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Masa Aktif Registrasi</p>
+                                            <p className="text-emerald-400 font-bold mt-1">{translator.masaAktif || 'Seumur Hidup'}</p>
+                                        </div>
+                                        {translator.skLengkap && (
+                                            <div className="col-span-2 border-t border-slate-850 pt-2 mt-1">
+                                                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Keterangan SK Lengkap</p>
+                                                <p className="text-slate-300 mt-1 font-medium italic">{translator.skLengkap}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
                             ) : (
-                                <p>
-                                    It is verified that the sworn translator named <strong className="text-white font-bold">{name}</strong> is officially registered as a member of IPPTI and is a sworn translator certified under the <strong className="text-white font-bold">Ministry of Law and Human Rights</strong> of the Republic of Indonesia pursuant to decree number <strong className="text-white font-bold">{skDetails}</strong> with translation language pair(s) <strong className="text-white font-bold">{languages}</strong>.
-                                </p>
+                                <>
+                                    <p>
+                                        It is verified that the sworn translator named <strong className="text-white font-bold">{name}</strong> is officially registered as a member of IPPTI and is a sworn translator certified under the <strong className="text-white font-bold">Ministry of Law and Human Rights</strong> of the Republic of Indonesia pursuant to decree number <strong className="text-white font-bold">{translator.noSkKemenkum || skDetails}</strong> issued on <strong className="text-white font-bold">{translator.tglSk || 'October 5, 2022'}</strong>.
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-4 bg-slate-950/60 p-4 border border-slate-800 rounded-2xl text-xs mt-3">
+                                        <div>
+                                            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Language Pairing</p>
+                                            <p className="text-white font-semibold mt-1">{languages}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Registration Validity</p>
+                                            <p className="text-emerald-400 font-bold mt-1">{translator.masaAktif === 'Seumur Hidup' ? 'Lifetime' : (translator.masaAktif || 'Lifetime')}</p>
+                                        </div>
+                                        {translator.skLengkap && (
+                                            <div className="col-span-2 border-t border-slate-850 pt-2 mt-1">
+                                                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Decree Full Statement</p>
+                                                <p className="text-slate-300 mt-1 font-medium italic">{translator.skLengkap}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>
