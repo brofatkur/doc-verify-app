@@ -54,8 +54,17 @@ export default function LoginPage() {
                 <div className="bg-slate-900/80 backdrop-blur-2xl py-8 px-6 shadow-2xl rounded-2xl border border-slate-800/80 sm:px-10">
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         {error && (
-                            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-455 text-rose-400 p-3.5 rounded-xl text-sm text-center font-medium leading-snug">
-                                {error}
+                            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-3.5 rounded-xl text-sm text-center font-medium leading-snug">
+                                {error.includes('salah') || error.includes('password') ? (
+                                    <span>
+                                        {error}{' '}
+                                        <Link href="/forgot-password" className="text-emerald-400 hover:text-emerald-350 hover:underline font-bold transition">
+                                            Lupa Password?
+                                        </Link>
+                                    </span>
+                                ) : (
+                                    error
+                                )}
                             </div>
                         )}
 
