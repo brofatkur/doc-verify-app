@@ -39,6 +39,31 @@ export async function getSession() {
     return await decrypt(session)
 }
 
+export async function findTranslatorByMemberNo(memberNo: string) {
+    if (!memberNo) return { success: false, error: 'Nomor anggota wajib diisi.' }
+    try {
+        const user = await prisma.user.findFirst({
+            where: {
+                skNumber: memberNo,
+                role: 'TRANSLATOR'
+            }
+        })
+        if (user) {
+            return {
+                success: true,
+                translator: {
+                    name: user.name,
+                    email: user.email.endsWith('@ippti.or.id') ? '' : user.email,
+                }
+            }
+        }
+        return { success: false, error: 'Nomor anggota tidak ditemukan dalam data pra-impor.' }
+    } catch (error: any) {
+        console.error('Find translator by member number error:', error)
+        return { success: false, error: 'Gagal mencari nomor anggota.' }
+    }
+}
+
 export async function registerTranslator(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
@@ -46,28 +71,48 @@ export async function registerTranslator(formData: FormData) {
     const skNumber = formData.get('skNumber') as string
 
     if (!email || !password || !name || !skNumber) {
-        return { success: false, error: 'All fields are required.' }
+        return { success: false, error: 'Semua kolom wajib diisi.' }
     }
 
     try {
+        // Check if there is an existing translator by member number
+        const existingBySk = await prisma.user.findFirst({
+            where: { skNumber, role: 'TRANSLATOR' }
+        })
+
         const existingUser = await prisma.user.findUnique({
             where: { email }
         })
 
-        if (existingUser) {
-            return { success: false, error: 'Email is already registered.' }
+        if (existingUser && (!existingBySk || existingUser.id !== existingBySk.id)) {
+            return { success: false, error: 'Alamat email sudah terdaftar.' }
         }
 
         const hashedPassword = await bcrypt.hash(password, 10)
+        let user;
 
-        const user = await prisma.user.create({
-            data: {
-                email,
-                password: hashedPassword,
-                name,
-                skNumber
-            }
-        })
+        if (existingBySk) {
+            // Claim/update the pre-imported translator record
+            user = await prisma.user.update({
+                where: { id: existingBySk.id },
+                data: {
+                    email,
+                    password: hashedPassword,
+                    name
+                }
+            })
+        } else {
+            // Create a completely new translator
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    password: hashedPassword,
+                    name,
+                    skNumber,
+                    role: 'TRANSLATOR'
+                }
+            })
+        }
 
         const expires = new Date(Date.now() + 24 * 60 * 60 * 1000)
         const session = await encrypt({ userId: user.id, email: user.email, name: user.name, role: user.role })
@@ -78,7 +123,7 @@ export async function registerTranslator(formData: FormData) {
         return { success: true }
     } catch (error: any) {
         console.error('Registration failed:', error)
-        return { success: false, error: 'An error occurred during registration. Please try again.' }
+        return { success: false, error: 'Terjadi kesalahan sistem saat mendaftar: ' + error.message }
     }
 }
 
