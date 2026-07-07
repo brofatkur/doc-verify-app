@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ShieldCheck, FileText, Settings, LogOut } from "lucide-react";
 import { getSession, logoutTranslator } from "@/actions/authActions";
+import SidebarNav from "./SidebarNav";
 
 export default async function AdminLayout({
     children,
@@ -21,16 +22,7 @@ export default async function AdminLayout({
                     <p className="text-slate-400 text-xs mt-2">Panel Dashboard</p>
                 </div>
 
-                <nav className="flex-1 px-4 py-4 space-y-2">
-                    <Link href="/admin" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition">
-                        <FileText className="w-5 h-5 text-emerald-400" />
-                        <span className="font-medium">Data Dokumen</span>
-                    </Link>
-                    <Link href="/admin/profile" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition">
-                        <Settings className="w-5 h-5 text-slate-400" />
-                        <span className="font-medium">Profil & Layanan</span>
-                    </Link>
-                </nav>
+                <SidebarNav role={(session?.role as string) || 'TRANSLATOR'} />
 
                 {session && (
                     <div className="px-6 py-4 border-t border-slate-800/40 flex items-center gap-3">

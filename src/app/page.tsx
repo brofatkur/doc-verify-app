@@ -2,16 +2,20 @@
 
 import { useState, useTransition, useRef } from "react";
 import { searchDocument } from "@/actions/documentActions";
-import { ShieldCheck, Search, QrCode, ArrowRight, Loader2, AlertCircle, Camera } from "lucide-react";
+import { searchTranslatorAction } from "@/actions/authActions";
+import { ShieldCheck, Search, QrCode, ArrowRight, Loader2, AlertCircle, Camera, Award, Globe, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import jsQR from "jsqr";
 
 export default function Home() {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'search' | 'scan'>('search');
+    const [activeTab, setActiveTab] = useState<'search' | 'scan' | 'translator'>('search');
     const [searchQuery, setSearchQuery] = useState('');
+    const [translatorQuery, setTranslatorQuery] = useState('');
+    const [translatorResults, setTranslatorResults] = useState<any[]>([]);
     const [isPending, startTransition] = useTransition();
+    const [isTranslatorPending, startTranslatorTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [scanLoading, setScanLoading] = useState(false);
     const qrFileInputRef = useRef<HTMLInputElement>(null);
@@ -85,8 +89,28 @@ export default function Home() {
         reader.readAsDataURL(file);
     };
 
+    const handleTranslatorSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        setTranslatorResults([]);
+        if (!translatorQuery.trim()) return;
+
+        startTranslatorTransition(async () => {
+            const res = await searchTranslatorAction(translatorQuery);
+            if (res.success && res.translators) {
+                if (res.translators.length === 0) {
+                    setError("Penerjemah tidak ditemukan.");
+                } else {
+                    setTranslatorResults(res.translators);
+                }
+            } else {
+                setError(res.error || "Gagal mencari penerjemah.");
+            }
+        });
+    };
+
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between relative overflow-hidden selection:bg-emerald-500 selection:text-slate-950">
+        <div className="min-h-screen bg-slate-955 bg-slate-950 text-slate-100 flex flex-col justify-between relative overflow-hidden selection:bg-emerald-500 selection:text-slate-950">
             {/* Background blur blobs */}
             <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-emerald-500/5 rounded-full filter blur-[120px] animate-blob"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] bg-blue-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000"></div>
@@ -108,7 +132,7 @@ export default function Home() {
                 <div className="text-center space-y-6 mb-12">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold tracking-wide uppercase">
                         <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        Portal Validasi Resmi Dokumen Terjemahan
+                        Portal Validasi Resmi Dokumen & Penerjemah Tersumpah
                     </div>
 
                     <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
@@ -119,27 +143,34 @@ export default function Home() {
                     </h1>
 
                     <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
-                        Verifikasi pendaftaran dan keaslian dokumen terjemahan tersumpah Anda secara instan menggunakan alat pemeriksa validasi kami.
+                        Verifikasi pendaftaran, keaslian dokumen terjemahan tersumpah Anda, serta keanggotaan resmi penerjemah secara instan.
                     </p>
                 </div>
 
                 {/* Tab Container */}
                 <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-2xl border border-slate-800/80 rounded-2xl shadow-2xl p-6 sm:p-8">
                     {/* Tabs */}
-                    <div className="flex border-b border-slate-800 pb-3.5 mb-6">
+                    <div className="flex border-b border-slate-800 pb-3.5 mb-6 overflow-x-auto gap-2 scrollbar-none">
                         <button
-                            onClick={() => { setActiveTab('search'); setError(null); }}
-                            className={`flex-1 flex items-center justify-center gap-2.5 pb-3 text-sm font-semibold border-b-2 transition-all duration-200 cursor-pointer ${activeTab === 'search' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                            onClick={() => { setActiveTab('search'); setError(null); setTranslatorResults([]); }}
+                            className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'search' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
                         >
-                            <Search className="w-4 h-4" />
-                            <span>Verifikasi via Nomor</span>
+                            <Search className="w-3.5 h-3.5" />
+                            <span>Nomor Registrasi</span>
                         </button>
                         <button
-                            onClick={() => { setActiveTab('scan'); setError(null); }}
-                            className={`flex-1 flex items-center justify-center gap-2.5 pb-3 text-sm font-semibold border-b-2 transition-all duration-200 cursor-pointer ${activeTab === 'scan' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                            onClick={() => { setActiveTab('scan'); setError(null); setTranslatorResults([]); }}
+                            className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'scan' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
                         >
-                            <QrCode className="w-4 h-4" />
-                            <span>Pindai Kode QR</span>
+                            <QrCode className="w-3.5 h-3.5" />
+                            <span>Pindai QR</span>
+                        </button>
+                        <button
+                            onClick={() => { setActiveTab('translator'); setError(null); setTranslatorResults([]); }}
+                            className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'translator' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                        >
+                            <Award className="w-3.5 h-3.5" />
+                            <span>Cari Penerjemah</span>
                         </button>
                     </div>
 
@@ -219,6 +250,69 @@ export default function Home() {
                             <p className="text-xs text-slate-500 leading-relaxed">
                                 Ambil foto kode QR yang dibubuhkan pada dokumen terjemahan untuk mendekode dan memverifikasi secara otomatis.
                             </p>
+                        </div>
+                    )}
+
+                    {/* Tab 3: Translator Search */}
+                    {activeTab === 'translator' && (
+                        <div className="space-y-5">
+                            <form onSubmit={handleTranslatorSearchSubmit} className="space-y-4">
+                                <div>
+                                    <label htmlFor="translator-input" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">
+                                        Nama, Nomor Anggota, atau No SK Kemenkumham
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="translator-input"
+                                            type="text"
+                                            required
+                                            value={translatorQuery}
+                                            onChange={(e) => setTranslatorQuery(e.target.value)}
+                                            placeholder="Contoh: Muhammad Arifin atau 25004"
+                                            className="w-full pl-4 pr-12 py-3.5 border border-slate-800 rounded-xl bg-slate-950/60 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 text-sm font-semibold transition-all duration-200"
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={isTranslatorPending}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 text-white rounded-lg transition-all duration-200 disabled:opacity-50 cursor-pointer shadow-md"
+                                        >
+                                            {isTranslatorPending ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <ArrowRight className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            {/* Translator Results */}
+                            {translatorResults.length > 0 && (
+                                <div className="space-y-3 pt-2">
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Hasil Pencarian:</p>
+                                    <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                                        {translatorResults.map((t) => (
+                                            <Link
+                                                key={t.id}
+                                                href={`/verify-translator/${t.id}`}
+                                                className="flex items-center gap-3 p-3 bg-slate-950/60 border border-slate-800 rounded-xl hover:border-emerald-500/60 hover:bg-slate-900/60 transition group cursor-pointer"
+                                            >
+                                                <div className="w-9 h-9 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold overflow-hidden">
+                                                    {t.profilePicture ? (
+                                                        <img src={t.profilePicture} alt={t.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <User className="w-4 h-4 text-slate-400" />
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 overflow-hidden">
+                                                    <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition truncate">{t.name}</p>
+                                                    <p className="text-[10px] text-slate-450 truncate font-mono">No. Anggota: {t.skNumber}</p>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

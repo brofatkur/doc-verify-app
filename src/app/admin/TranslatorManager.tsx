@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Plus, Edit, Trash2, X, Loader2, Search, Award, Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { createTranslatorByAdmin, updateTranslatorByAdmin, deleteTranslatorByAdmin } from '@/actions/adminActions'
+import TranslatorImportButton from './TranslatorImportButton'
 
 interface UserRecord {
     id: string
@@ -161,13 +162,16 @@ export default function TranslatorManager({ initialTranslators }: { initialTrans
                         />
                     </div>
                     {/* Add Button */}
-                    <button
-                        onClick={openCreateModal}
-                        className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer"
-                    >
-                        <Plus className="w-3.5 h-3.5 stroke-[3px]" />
-                        <span>Tambah Anggota/Pengurus</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <TranslatorImportButton />
+                        <button
+                            onClick={openCreateModal}
+                            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all duration-150 cursor-pointer flex-shrink-0"
+                        >
+                            <Plus className="w-3.5 h-3.5 stroke-[3px]" />
+                            <span>Tambah Anggota/Pengurus</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 

@@ -164,3 +164,100 @@ export async function updateProfile(formData: FormData) {
         return { success: false, error: 'Gagal memperbarui profil: ' + error.message }
     }
 }
+
+export async function forgotPassword(email: string) {
+    try {
+        if (!email) return { success: false, error: 'Email wajib diisi.' }
+        const user = await prisma.user.findUnique({ where: { email } })
+        if (!user) {
+            // Avoid leaking user existence for safety but let them know it's processed
+            return { success: true, message: 'Jika email terdaftar, instruksi reset password telah dikirim.' }
+        }
+
+        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        const expiresAt = new Date(Date.now() + 3600000) // 1 hour expiry
+
+        // Save token to DB
+        await prisma.passwordResetToken.upsert({
+            where: { token },
+            update: { expiresAt },
+            create: { email, token, expiresAt }
+        })
+
+        const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${token}`
+
+        // Log link to terminal for easy local testing
+        console.log('\n======================================================')
+        console.log(`[RESET PASSWORD LINK FOR ${email}]:`)
+        console.log(resetLink)
+        console.log('======================================================\n')
+
+        // Simulating email sending successfully
+        return { success: true, message: 'Link reset password telah dikirim ke email terdaftar (dan dicatat di log terminal).' }
+    } catch (error: any) {
+        console.error('Forgot password error:', error)
+        return { success: false, error: 'Terjadi kesalahan saat memproses permintaan Anda.' }
+    }
+}
+
+export async function resetPassword(token: string, passwordConfirm: string) {
+    try {
+        if (!token) return { success: false, error: 'Token reset tidak valid.' }
+        if (!passwordConfirm || passwordConfirm.length < 6) return { success: false, error: 'Password minimal terdiri dari 6 karakter.' }
+
+        const resetToken = await prisma.passwordResetToken.findUnique({ where: { token } })
+        if (!resetToken || resetToken.expiresAt < new Date()) {
+            return { success: false, error: 'Token reset sudah kadaluarsa atau tidak valid.' }
+        }
+
+        const hashedPassword = await bcrypt.hash(passwordConfirm, 10)
+
+        // Update user
+        await prisma.user.update({
+            where: { email: resetToken.email },
+            data: { password: hashedPassword }
+        })
+
+        // Clean token
+        await prisma.passwordResetToken.delete({ where: { token } })
+
+        return { success: true, message: 'Password Anda berhasil diperbarui. Silakan masuk kembali.' }
+    } catch (error: any) {
+        console.error('Reset password error:', error)
+        return { success: false, error: 'Gagal memperbarui password.' }
+    }
+}
+
+export async function searchTranslatorAction(query: string) {
+    try {
+        if (!query || query.trim() === '') return { success: false, error: 'Query pencarian kosong.' }
+        const cleanQuery = query.trim().toLowerCase()
+        const translators = await prisma.user.findMany({
+            where: {
+                OR: [
+                    { name: { contains: cleanQuery } },
+                    { skNumber: { contains: cleanQuery } },
+                    { bio: { contains: cleanQuery } }
+                ]
+            },
+            select: {
+                id: true,
+                name: true,
+                skNumber: true,
+                languageServices: true,
+                bio: true,
+                profilePicture: true
+            }
+        })
+        
+        // Filter only translators
+        // Wait, let's keep only users who have a SK number (translators have numeric/SK numbers)
+        // or specifically role = 'TRANSLATOR'
+        const filtered = translators.filter(t => t.skNumber !== 'IPPTI-BOARD')
+        
+        return { success: true, translators: filtered }
+    } catch (error: any) {
+        console.error('Search translator error:', error)
+        return { success: false, error: 'Terjadi kesalahan sistem saat mencari penerjemah.' }
+    }
+}

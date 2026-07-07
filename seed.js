@@ -48,6 +48,44 @@ async function main() {
             }
         })
 
+        const boardAdmin = await prisma.user.upsert({
+            where: { email: 'admin@example.com' },
+            update: {
+                password: await bcrypt.hash('admin123', 10),
+                name: 'IPPTI Admin Staff',
+                skNumber: 'IPPTI-ADMIN-01',
+                role: 'ADMIN'
+            },
+            create: {
+                email: 'admin@example.com',
+                password: await bcrypt.hash('admin123', 10),
+                name: 'IPPTI Admin Staff',
+                skNumber: 'IPPTI-ADMIN-01',
+                role: 'ADMIN'
+            }
+        })
+
+        const arifin = await prisma.user.upsert({
+            where: { email: 'arifin@example.com' },
+            update: {
+                password: hashedPassword,
+                name: 'Muhammad Arifin',
+                skNumber: '25004',
+                role: 'TRANSLATOR',
+                languageServices: 'Indonesia - Inggris, Inggris - Indonesia, Indonesia - Belanda, Belanda - Indonesia',
+                bio: 'AHU-55 AH.03.07.2022 Tanggal 5 Oktober 2022'
+            },
+            create: {
+                email: 'arifin@example.com',
+                password: hashedPassword,
+                name: 'Muhammad Arifin',
+                skNumber: '25004',
+                role: 'TRANSLATOR',
+                languageServices: 'Indonesia - Inggris, Inggris - Indonesia, Indonesia - Belanda, Belanda - Indonesia',
+                bio: 'AHU-55 AH.03.07.2022 Tanggal 5 Oktober 2022'
+            }
+        })
+
         const document = await prisma.document.upsert({
             where: { registrationNumber: 'REG-Dutch-2026-001' },
             update: {

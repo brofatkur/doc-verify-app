@@ -2,10 +2,10 @@
 
 import { useState, useTransition, useRef } from 'react'
 import { Upload, Loader2, AlertTriangle, CheckCircle, Download, X, HelpCircle } from 'lucide-react'
-import { importDocumentsFromExcel } from '@/actions/documentActions'
+import { importTranslatorsFromExcel } from '@/actions/adminActions'
 import * as XLSX from 'xlsx'
 
-export default function ExcelImportButton() {
+export default function TranslatorImportButton() {
     const [isPending, startTransition] = useTransition()
     const [previewRows, setPreviewRows] = useState<any[]>([])
     const [base64Data, setBase64Data] = useState<string>('')
@@ -48,24 +48,24 @@ export default function ExcelImportButton() {
                 const headers = Object.keys(firstRow)
                 const normalizeKey = (key: any) => String(key).toLowerCase().replace(/[^a-z0-9]/g, '').trim()
                 
-                let hasClientName = false
-                let hasDocType = false
-                let hasLangPair = false
+                let hasNoAnggota = false
+                let hasNamaPenerjemah = false
+                let hasEmail = false
 
                 for (const header of headers) {
                     const h = normalizeKey(header)
-                    if (['namaklien', 'namadidokumen', 'clientname', 'klien'].includes(h)) {
-                        hasClientName = true
+                    if (['noanggota', 'nomoranggota', 'membernumber'].includes(h)) {
+                        hasNoAnggota = true
                     }
-                    if (['tipedokumen', 'documenttype', 'tipe'].includes(h)) {
-                        hasDocType = true
+                    if (['namapenerjemah', 'nama', 'fullname', 'name'].includes(h)) {
+                        hasNamaPenerjemah = true
                     }
-                    if (['arahbahasa', 'pasanganbahasa', 'languagepair', 'bahasa'].includes(h)) {
-                        hasLangPair = true
+                    if (['email', 'alamatemail'].includes(h)) {
+                        hasEmail = true
                     }
                 }
 
-                setIsValidFormat(hasClientName && hasDocType && hasLangPair)
+                setIsValidFormat(hasNoAnggota && hasNamaPenerjemah && hasEmail)
                 setPreviewRows(parsedRows.slice(0, 5)) // show first 5 rows for preview
                 setShowPreview(true)
             } catch (err: any) {
@@ -77,7 +77,7 @@ export default function ExcelImportButton() {
 
     const executeImport = () => {
         startTransition(async () => {
-            const res = await importDocumentsFromExcel(base64Data)
+            const res = await importTranslatorsFromExcel(base64Data)
             setResult(res)
             setShowPreview(false)
             if (fileInputRef.current) {
@@ -96,7 +96,7 @@ export default function ExcelImportButton() {
     }
 
     return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+        <div className="flex items-center gap-2">
             <div className="relative">
                 <input
                     type="file"
@@ -104,38 +104,38 @@ export default function ExcelImportButton() {
                     onChange={handleFileChange}
                     accept=".xlsx,.xls,.csv"
                     className="hidden"
-                    id="excel-upload-input"
+                    id="translator-upload-input"
                 />
                 <label
-                    htmlFor="excel-upload-input"
-                    className={`flex items-center gap-2 border border-gray-200 hover:border-emerald-500 hover:text-emerald-700 bg-white text-gray-700 px-4 py-2.5 rounded-xl font-semibold transition cursor-pointer text-sm shadow-sm ${isPending ? 'opacity-50 pointer-events-none' : ''}`}
+                    htmlFor="translator-upload-input"
+                    className={`flex items-center gap-1.5 border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 bg-white text-gray-700 px-3 py-2 rounded-xl font-semibold transition cursor-pointer text-xs shadow-sm ${isPending ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                     {isPending ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
                     ) : (
-                        <Upload className="w-4 h-4 text-gray-400" />
+                        <Upload className="w-3.5 h-3.5 text-gray-400" />
                     )}
-                    <span>Impor Excel</span>
+                    <span>Impor Penerjemah</span>
                 </label>
             </div>
             <a
-                href="/template-impor-dokumen.xlsx"
+                href="/template-impor-penerjemah.xlsx"
                 download
-                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 px-1 py-1"
-                title="Unduh templat Excel (.xlsx) resmi"
+                className="text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 px-1 py-1"
+                title="Unduh templat impor penerjemah (.xlsx)"
             >
-                <Download className="w-3.5 h-3.5" />
-                <span>Unduh Templat</span>
+                <Download className="w-3 h-3" />
+                <span>Templat</span>
             </a>
 
             {/* Preview & Confirmation Modal */}
             {showPreview && (
                 <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl p-6 border border-slate-100 max-h-[85vh] flex flex-col">
+                    <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl p-6 border border-slate-100 max-h-[85vh] flex flex-col text-left">
                         <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 flex-shrink-0">
                             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                                 <HelpCircle className="w-5 h-5 text-emerald-600" />
-                                <span>Pratinjau Data Impor Dokumen</span>
+                                <span>Pratinjau Data Impor Penerjemah</span>
                             </h3>
                             <button onClick={cancelImport} className="text-slate-400 hover:text-slate-600">
                                 <X className="w-5 h-5" />
@@ -149,24 +149,24 @@ export default function ExcelImportButton() {
                                     <div>
                                         <p className="font-extrabold text-rose-900 text-base">Peringatan: File tidak sesuai format!</p>
                                         <p className="text-rose-700 font-medium text-xs mt-1 leading-relaxed">
-                                            Berkas yang diunggah tidak memiliki kolom header template yang diwajibkan. Pastikan berkas memiliki kolom: <strong>Nama di Dokumen</strong>, <strong>Tipe Dokumen</strong>, dan <strong>Pasangan Bahasa</strong>.
+                                            Berkas yang diunggah tidak memiliki kolom header template yang diwajibkan. Pastikan berkas memiliki kolom: <strong>No Anggota</strong>, <strong>Nama Penerjemah</strong>, dan <strong>Email</strong>.
                                         </p>
                                     </div>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl text-xs font-semibold text-slate-600 leading-relaxed">
-                                        Menampilkan pratinjau 5 baris pertama data dari berkas Excel Anda. Periksa kembali kebenaran kolom sebelum menekan tombol konfirmasi.
+                                    <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl text-xs font-semibold text-slate-650 leading-relaxed text-slate-600">
+                                        Menampilkan pratinjau 5 baris pertama data penerjemah dari Excel. Password default untuk semua akun yang baru diimpor adalah <strong className="text-slate-900">penerjemah123</strong>.
                                     </div>
 
                                     <div className="border border-slate-200/80 rounded-xl overflow-hidden shadow-inner">
                                         <table className="w-full text-left text-xs">
                                             <thead className="bg-slate-100 border-b border-slate-200">
                                                 <tr>
-                                                    <th className="px-4 py-2.5 font-bold text-slate-500">No Registrasi</th>
-                                                    <th className="px-4 py-2.5 font-bold text-slate-500">Nama di Dokumen</th>
-                                                    <th className="px-4 py-2.5 font-bold text-slate-500">Tipe Dokumen</th>
-                                                    <th className="px-4 py-2.5 font-bold text-slate-500">Pasangan Bahasa</th>
+                                                    <th className="px-4 py-2.5 font-bold text-slate-500">No Anggota</th>
+                                                    <th className="px-4 py-2.5 font-bold text-slate-500">Nama Penerjemah</th>
+                                                    <th className="px-4 py-2.5 font-bold text-slate-500">Email</th>
+                                                    <th className="px-4 py-2.5 font-bold text-slate-500 font-medium">Arah Bahasa</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-100 bg-white">
@@ -180,16 +180,16 @@ export default function ExcelImportButton() {
                                                         return match ? row[match] : ''
                                                     }
 
-                                                    const reg = find(['noregister', 'noregistrasi', 'nomorregistrasi', 'registrationnumber']) || '(Otomatis)'
-                                                    const name = find(['namaklien', 'namadidokumen', 'clientname', 'klien']) || '-'
-                                                    const type = find(['tipedokumen', 'documenttype', 'tipe']) || '-'
-                                                    const pair = find(['arahbahasa', 'pasanganbahasa', 'languagepair', 'bahasa']) || '-'
+                                                    const no = find(['noanggota', 'nomoranggota', 'membernumber']) || '-'
+                                                    const name = find(['namapenerjemah', 'nama', 'fullname', 'name']) || '-'
+                                                    const email = find(['email', 'alamatemail']) || '-'
+                                                    const pair = find(['arahbahasa', 'pasanganbahasa']) || '-'
 
                                                     return (
                                                         <tr key={i} className="hover:bg-slate-50/50">
-                                                            <td className="px-4 py-2.5 font-mono text-[10px] text-slate-500 truncate max-w-[100px]">{reg}</td>
-                                                            <td className="px-4 py-2.5 text-slate-700 font-semibold truncate max-w-[120px]">{name}</td>
-                                                            <td className="px-4 py-2.5 text-slate-600 truncate max-w-[150px]">{type}</td>
+                                                            <td className="px-4 py-2.5 font-mono text-[10px] text-slate-700 truncate max-w-[100px]">{no}</td>
+                                                            <td className="px-4 py-2.5 text-slate-800 font-bold truncate max-w-[120px]">{name}</td>
+                                                            <td className="px-4 py-2.5 text-slate-600 truncate max-w-[130px] font-medium">{email}</td>
                                                             <td className="px-4 py-2.5 text-slate-600 truncate max-w-[120px]">{pair}</td>
                                                         </tr>
                                                     )
@@ -224,7 +224,7 @@ export default function ExcelImportButton() {
             {/* Results Feedback Modal */}
             {result && (
                 <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl p-6 border border-slate-100 max-h-[80vh] overflow-y-auto">
+                    <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl p-6 border border-slate-100 max-h-[80vh] overflow-y-auto text-left">
                         <div className="flex items-center gap-3 mb-4">
                             {result.success ? (
                                 <CheckCircle className="w-8 h-8 text-emerald-500 flex-shrink-0" />
