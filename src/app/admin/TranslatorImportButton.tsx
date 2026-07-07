@@ -28,12 +28,16 @@ export default function TranslatorImportButton() {
         const reader = new FileReader()
         reader.onload = async (event) => {
             try {
-                const resultBase64 = event.target?.result as string
-                const base64 = resultBase64.split(',')[1]
+                const arrayBuffer = event.target?.result as ArrayBuffer
+                const bytes = new Uint8Array(arrayBuffer || [])
+                let binary = ''
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i])
+                }
+                const base64 = window.btoa(binary)
                 setBase64Data(base64)
 
-                const buffer = new Uint8Array(event.target?.result as ArrayBuffer || [])
-                const workbook = XLSX.read(buffer, { type: 'array' })
+                const workbook = XLSX.read(bytes, { type: 'array' })
                 const firstSheetName = workbook.SheetNames[0]
                 const worksheet = workbook.Sheets[firstSheetName]
                 const parsedRows = XLSX.utils.sheet_to_json<any>(worksheet, { defval: "" })
