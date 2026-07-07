@@ -1,24 +1,124 @@
 'use client'
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { searchDocument } from "@/actions/documentActions";
-import { searchTranslatorAction } from "@/actions/authActions";
 import { ShieldCheck, Search, QrCode, ArrowRight, Loader2, AlertCircle, Camera, Award, Globe, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import jsQR from "jsqr";
 
+type LangType = 'id' | 'en' | 'zh' | 'ar';
+
+const translations = {
+    id: {
+        title_doc: "Portal Validasi Resmi Dokumen",
+        hero_title_doc: "Kepercayaan Berlandaskan Bukti Kriptografis.",
+        hero_desc_doc: "Verifikasi pendaftaran dan keaslian dokumen terjemahan tersumpah Anda secara instan.",
+        tab_reg: "Nomor Registrasi",
+        tab_qr: "Pindai QR",
+        label_reg: "Nomor Registrasi atau 8-Karakter ID Dokumen",
+        placeholder_reg: "Contoh: REG-Belanda-001 atau VFY7A8B9",
+        desc_reg: "Verifikasi dokumen dengan mencari nomor registrasi yang dibubuhkan oleh penerjemah tersumpah, atau 8-karakter ID verifikasi unik.",
+        upload_qr: "Ambil Foto atau Pindai QR",
+        upload_qr_desc: "Mendukung jepretan kamera langsung & unggahan gambar",
+        desc_qr: "Gunakan kamera perangkat Anda untuk memindai kode QR verifikasi pada dokumen fisik, atau unggah foto/tangkapan layar kode QR.",
+        not_found_doc: "Dokumen tidak ditemukan.",
+        nav_verify_trans: "Verifikasi Penerjemah",
+        footer: "DocVerify IPPTI. Keamanan Terjemahan Tersumpah Resmi.",
+        scan_loading: "Membaca Berkas...",
+        scan_err_canvas: "Gagal memproses kanvas gambar.",
+        scan_err_qr: "Tidak dapat menemukan kode QR yang terbaca. Coba pindai kembali dengan gambar yang lebih jelas.",
+        scan_err_decode: "Kode QR ini tidak dikenali sebagai URL verifikasi DocVerify atau ID Dokumen yang valid.",
+        scan_err_load: "Gagal memuat berkas gambar."
+    },
+    en: {
+        title_doc: "Official Document Validation Portal",
+        hero_title_doc: "Trust Built on Cryptographic Proof.",
+        hero_desc_doc: "Verify the registration and authenticity of your sworn translation documents instantly.",
+        tab_reg: "Registration Number",
+        tab_qr: "Scan QR",
+        label_reg: "Registration Number or 8-Character Document ID",
+        placeholder_reg: "Example: REG-Dutch-001 or VFY7A8B9",
+        desc_reg: "Verify document by searching registration number issued by sworn translator, or unique 8-character verification ID.",
+        upload_qr: "Capture Photo or Scan QR",
+        upload_qr_desc: "Supports direct camera shots & image uploads",
+        desc_qr: "Use your device camera to scan the verification QR code on the physical document, or upload a photo/screenshot of the QR code.",
+        not_found_doc: "Document not found.",
+        nav_verify_trans: "Verify Translator",
+        footer: "DocVerify IPPTI. Official Sworn Translation Security.",
+        scan_loading: "Scanning File...",
+        scan_err_canvas: "Failed to process image canvas.",
+        scan_err_qr: "Could not find a readable QR code. Try scanning again with a clearer image.",
+        scan_err_decode: "This QR code is not recognized as a valid DocVerify verification URL or Document ID.",
+        scan_err_load: "Failed to load image file."
+    },
+    zh: {
+        title_doc: "官方文件验证门户",
+        hero_title_doc: "基于密码学证明的信任。",
+        hero_desc_doc: "即时验证您的宣誓翻译文件的注册信息和真实性。",
+        tab_reg: "注册编号",
+        tab_qr: "扫描二维码",
+        label_reg: "注册编号或8位文件 ID",
+        placeholder_reg: "例如: REG-Dutch-001 或 VFY7A8B9",
+        desc_reg: "通过搜索宣誓翻译员发放的注册号或唯一的8位验证 ID 来验证文件。",
+        upload_qr: "拍摄照片或扫描二维码",
+        upload_qr_desc: "支持直接相机拍摄和图片上传",
+        desc_qr: "使用您的设备摄像头扫描纸质文件上的验证二维码，或上传二维码的照片/屏幕截图。",
+        not_found_doc: "未找到文件。",
+        nav_verify_trans: "验证翻译员",
+        footer: "DocVerify IPPTI. 官方宣誓翻译安全。",
+        scan_loading: "正在读取文件...",
+        scan_err_canvas: "处理图像画布失败。",
+        scan_err_qr: "找不到可读取的二维码。请使用更清晰的图片重新扫描。",
+        scan_err_decode: "此二维码未被识别为有效的 DocVerify 验证 URL 或文件 ID。",
+        scan_err_load: "加载图像文件失败。"
+    },
+    ar: {
+        title_doc: "البوابة الرسمية للتحقق من المستندات",
+        hero_title_doc: "ثقة مبنية على إثباتات تشفيرية.",
+        hero_desc_doc: "تحقق من تسجيل وصحة مستندات الترجمة المحلفة الخاصة بك فوراً.",
+        tab_reg: "رقم التسجيل",
+        tab_qr: "مسح رمز QR",
+        label_reg: "رقم التسجيل أو معرف مستند من 8 أحرف",
+        placeholder_reg: "مثال: REG-Dutch-001 أو VFY7A8B9",
+        desc_reg: "تحقق من المستند بالبحث عن رقم التسجيل الصادر عن المترجم المحلف، أو معرف التحقق الفريد المكون dari 8 أحرف.",
+        upload_qr: "التقاط صورة أو مسح رمز QR",
+        upload_qr_desc: "يدعم لقطات الكاميرا المباشرة وتحميل الصور",
+        desc_qr: "استخدم كاميرا جهازك لمسح رمز QR للتحقق على المستند الفعلي، أو قم بتحميل صورة/لقطة شاشة لرمز QR.",
+        not_found_doc: "المستند غير موجود.",
+        nav_verify_trans: "التحقق من المترجم",
+        footer: "DocVerify IPPTI. أمان الترجمة المحلفة الرسمية.",
+        scan_loading: "جاري فحص الملف...",
+        scan_err_canvas: "فشل في معالجة كانفاس الصورة.",
+        scan_err_qr: "لم يتم العثور على رمز QR صالح للقراءة. يرجى المحاولة مرة أخرى بصورة أوضح.",
+        scan_err_decode: "لا يتم التعرف على رمز QR هذا كعنوان URL صالح للتحقق من DocVerify أو معرف مستند.",
+        scan_err_load: "فشل في تحميل ملف الصورة."
+    }
+};
+
 export default function Home() {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'search' | 'scan' | 'translator'>('search');
+    const [lang, setLang] = useState<LangType>('id');
+    const [activeTab, setActiveTab] = useState<'search' | 'scan'>('search');
     const [searchQuery, setSearchQuery] = useState('');
-    const [translatorQuery, setTranslatorQuery] = useState('');
-    const [translatorResults, setTranslatorResults] = useState<any[]>([]);
     const [isPending, startTransition] = useTransition();
-    const [isTranslatorPending, startTranslatorTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [scanLoading, setScanLoading] = useState(false);
     const qrFileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        const savedLang = localStorage.getItem('docverify_lang') as LangType;
+        if (savedLang && ['id', 'en', 'zh', 'ar'].includes(savedLang)) {
+            setLang(savedLang);
+        }
+    }, []);
+
+    const changeLanguage = (newLang: LangType) => {
+        setLang(newLang);
+        localStorage.setItem('docverify_lang', newLang);
+        // Fire custom event to sync other open tabs/components
+        window.dispatchEvent(new Event('docverify_lang_changed'));
+    };
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,7 +130,7 @@ export default function Home() {
             if (res.success && res.documentId) {
                 router.push(`/verify/${res.documentId}`);
             } else {
-                setError(res.error || "Dokumen tidak ditemukan.");
+                setError(res.error || translations[lang].not_found_doc);
             }
         });
     };
@@ -49,7 +149,7 @@ export default function Home() {
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 if (!context) {
-                    setError("Gagal memproses kanvas gambar.");
+                    setError(translations[lang].scan_err_canvas);
                     setScanLoading(false);
                     return;
                 }
@@ -71,17 +171,17 @@ export default function Home() {
                         if (docIdClean.length === 8 && /^[A-Z0-9]+$/i.test(docIdClean)) {
                             router.push(`/verify/${docIdClean.toUpperCase()}`);
                         } else {
-                            setError("Kode QR ini tidak dikenali sebagai URL verifikasi DocVerify atau ID Dokumen yang valid.");
+                            setError(translations[lang].scan_err_decode);
                             setScanLoading(false);
                         }
                     }
                 } else {
-                    setError("Tidak dapat menemukan kode QR yang terbaca. Coba pindai kembali dengan gambar yang lebih jelas.");
+                    setError(translations[lang].scan_err_qr);
                     setScanLoading(false);
                 }
             };
             image.onerror = () => {
-                setError("Gagal memuat berkas gambar.");
+                setError(translations[lang].scan_err_load);
                 setScanLoading(false);
             };
             image.src = event.target?.result as string;
@@ -89,42 +189,40 @@ export default function Home() {
         reader.readAsDataURL(file);
     };
 
-    const handleTranslatorSearchSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
-        setTranslatorResults([]);
-        if (!translatorQuery.trim()) return;
-
-        startTranslatorTransition(async () => {
-            const res = await searchTranslatorAction(translatorQuery);
-            if (res.success && res.translators) {
-                if (res.translators.length === 0) {
-                    setError("Penerjemah tidak ditemukan.");
-                } else {
-                    setTranslatorResults(res.translators);
-                }
-            } else {
-                setError(res.error || "Gagal mencari penerjemah.");
-            }
-        });
-    };
+    const t = translations[lang];
+    const isRtl = lang === 'ar';
 
     return (
-        <div className="min-h-screen bg-slate-955 bg-slate-950 text-slate-100 flex flex-col justify-between relative overflow-hidden selection:bg-emerald-500 selection:text-slate-950">
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between relative overflow-hidden selection:bg-emerald-500 selection:text-slate-950" dir={isRtl ? 'rtl' : 'ltr'}>
             {/* Background blur blobs */}
             <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-emerald-500/5 rounded-full filter blur-[120px] animate-blob"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] bg-blue-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000"></div>
-            <div className="absolute top-[30%] right-[10%] w-[35vw] h-[35vw] bg-teal-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-4000"></div>
 
             {/* Header */}
             <header className="py-6 px-6 md:px-12 border-b border-slate-900 bg-slate-950/60 backdrop-blur-xl flex items-center justify-between z-10">
-                <div className="flex items-center gap-3">
+                <Link href="/" className="flex items-center gap-3">
                     <img src="/ippti-logo.jpg" alt="IPPTI Logo" className="h-9 w-auto rounded bg-white p-0.5 object-contain shadow-md" />
                     <span className="text-xl font-bold tracking-tight text-white">DocVerify</span>
-                </div>
-                <Link href="/admin" className="text-sm font-semibold text-emerald-400 hover:text-emerald-350 hover:underline transition-all duration-200">
-                    Akses Penerjemah
                 </Link>
+                
+                <div className="flex items-center gap-4">
+                    <Link href="/verify-translator" className="text-sm font-semibold text-emerald-400 hover:text-emerald-350 hover:underline transition-all duration-200">
+                        {t.nav_verify_trans}
+                    </Link>
+                    
+                    {/* Language Switcher */}
+                    <div className="flex bg-slate-900 p-0.5 rounded-lg border border-slate-800 dir-ltr" dir="ltr">
+                        {(['id', 'en', 'zh', 'ar'] as LangType[]).map((l) => (
+                            <button
+                                key={l}
+                                onClick={() => changeLanguage(l)}
+                                className={`px-2 py-1 rounded text-[10px] font-extrabold tracking-wider transition cursor-pointer ${lang === l ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-250'}`}
+                            >
+                                {l.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </header>
 
             {/* Main Area */}
@@ -132,18 +230,43 @@ export default function Home() {
                 <div className="text-center space-y-6 mb-12">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold tracking-wide uppercase">
                         <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        Portal Validasi Resmi Dokumen & Penerjemah Tersumpah
+                        {t.title_doc}
                     </div>
 
                     <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                        Kepercayaan Berlandaskan <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
-                            Bukti Kriptografis.
-                        </span>
+                        {lang === 'id' ? (
+                            <>
+                                Kepercayaan Berlandaskan <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
+                                    Bukti Kriptografis.
+                                </span>
+                            </>
+                        ) : lang === 'en' ? (
+                            <>
+                                Trust Built on <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
+                                    Cryptographic Proof.
+                                </span>
+                            </>
+                        ) : lang === 'zh' ? (
+                            <>
+                                基于密码学证明的 <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
+                                    信任。
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                الثقة المبنية على <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
+                                    إثباتات تشفيرية.
+                                </span>
+                            </>
+                        )}
                     </h1>
 
                     <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
-                        Verifikasi pendaftaran, keaslian dokumen terjemahan tersumpah Anda, serta keanggotaan resmi penerjemah secara instan.
+                        {t.hero_desc_doc}
                     </p>
                 </div>
 
@@ -152,25 +275,18 @@ export default function Home() {
                     {/* Tabs */}
                     <div className="flex border-b border-slate-800 pb-3.5 mb-6 overflow-x-auto gap-2 scrollbar-none">
                         <button
-                            onClick={() => { setActiveTab('search'); setError(null); setTranslatorResults([]); }}
+                            onClick={() => { setActiveTab('search'); setError(null); }}
                             className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'search' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
                         >
                             <Search className="w-3.5 h-3.5" />
-                            <span>Nomor Registrasi</span>
+                            <span>{t.tab_reg}</span>
                         </button>
                         <button
-                            onClick={() => { setActiveTab('scan'); setError(null); setTranslatorResults([]); }}
+                            onClick={() => { setActiveTab('scan'); setError(null); }}
                             className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'scan' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
                         >
                             <QrCode className="w-3.5 h-3.5" />
-                            <span>Pindai QR</span>
-                        </button>
-                        <button
-                            onClick={() => { setActiveTab('translator'); setError(null); setTranslatorResults([]); }}
-                            className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'translator' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
-                        >
-                            <Award className="w-3.5 h-3.5" />
-                            <span>Cari Penerjemah</span>
+                            <span>{t.tab_qr}</span>
                         </button>
                     </div>
 
@@ -186,7 +302,7 @@ export default function Home() {
                         <form onSubmit={handleSearchSubmit} className="space-y-4">
                             <div>
                                 <label htmlFor="search-input" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">
-                                    Nomor Registrasi atau 8-Karakter ID Dokumen
+                                    {t.label_reg}
                                 </label>
                                 <div className="relative">
                                     <input
@@ -195,24 +311,24 @@ export default function Home() {
                                         required
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Contoh: REG-Belanda-001 atau VFY7A8B9"
-                                        className="w-full pl-4 pr-12 py-3.5 border border-slate-800 rounded-xl bg-slate-950/60 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 text-sm font-semibold uppercase tracking-wide transition-all duration-200"
+                                        placeholder={t.placeholder_reg}
+                                        className="w-full pl-4 pr-12 py-3.5 border border-slate-800 rounded-xl bg-slate-950/60 text-white placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 text-sm font-semibold uppercase tracking-wide transition-all duration-200"
                                     />
                                     <button
                                         type="submit"
                                         disabled={isPending}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 text-white rounded-lg transition-all duration-200 disabled:opacity-50 cursor-pointer shadow-md"
+                                        className={`absolute ${isRtl ? 'left-2' : 'right-2'} top-1/2 -translate-y-1/2 p-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 text-white rounded-lg transition-all duration-200 disabled:opacity-50 cursor-pointer shadow-md`}
                                     >
                                         {isPending ? (
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
-                                            <ArrowRight className="w-4 h-4" />
+                                            <ArrowRight className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
                                         )}
                                     </button>
                                 </div>
                             </div>
                             <p className="text-xs text-slate-500 leading-relaxed">
-                                Verifikasi dokumen dengan mencari nomor registrasi yang dibubuhkan oleh penerjemah tersumpah, atau 8-karakter ID verifikasi unik.
+                                {t.desc_reg}
                             </p>
                         </form>
                     )}
@@ -240,79 +356,16 @@ export default function Home() {
                                     <Camera className="w-10 h-10 text-slate-500 group-hover:text-emerald-400 transition-colors duration-200 mb-4" />
                                 )}
                                 <span className="text-sm font-semibold text-slate-200 group-hover:text-emerald-400 transition-colors duration-200">
-                                    {scanLoading ? 'Membaca Berkas...' : 'Ambil Foto atau Unggah QR'}
+                                    {scanLoading ? t.scan_loading : t.upload_qr}
                                 </span>
                                 <span className="text-xs text-slate-500 mt-1.5">
-                                    Mendukung jepretan kamera langsung & unggahan gambar
+                                    {t.upload_qr_desc}
                                 </span>
                             </label>
                             
                             <p className="text-xs text-slate-500 leading-relaxed">
-                                Ambil foto kode QR yang dibubuhkan pada dokumen terjemahan untuk mendekode dan memverifikasi secara otomatis.
+                                {t.desc_qr}
                             </p>
-                        </div>
-                    )}
-
-                    {/* Tab 3: Translator Search */}
-                    {activeTab === 'translator' && (
-                        <div className="space-y-5">
-                            <form onSubmit={handleTranslatorSearchSubmit} className="space-y-4">
-                                <div>
-                                    <label htmlFor="translator-input" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">
-                                        Nama, Nomor Anggota, atau No SK Kemenkumham
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            id="translator-input"
-                                            type="text"
-                                            required
-                                            value={translatorQuery}
-                                            onChange={(e) => setTranslatorQuery(e.target.value)}
-                                            placeholder="Contoh: Muhammad Arifin atau 25004"
-                                            className="w-full pl-4 pr-12 py-3.5 border border-slate-800 rounded-xl bg-slate-950/60 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 text-sm font-semibold transition-all duration-200"
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={isTranslatorPending}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 text-white rounded-lg transition-all duration-200 disabled:opacity-50 cursor-pointer shadow-md"
-                                        >
-                                            {isTranslatorPending ? (
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <ArrowRight className="w-4 h-4" />
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-
-                            {/* Translator Results */}
-                            {translatorResults.length > 0 && (
-                                <div className="space-y-3 pt-2">
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Hasil Pencarian:</p>
-                                    <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
-                                        {translatorResults.map((t) => (
-                                            <Link
-                                                key={t.id}
-                                                href={`/verify-translator/${t.id}`}
-                                                className="flex items-center gap-3 p-3 bg-slate-950/60 border border-slate-800 rounded-xl hover:border-emerald-500/60 hover:bg-slate-900/60 transition group cursor-pointer"
-                                            >
-                                                <div className="w-9 h-9 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold overflow-hidden">
-                                                    {t.profilePicture ? (
-                                                        <img src={t.profilePicture} alt={t.name} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <User className="w-4 h-4 text-slate-400" />
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 overflow-hidden">
-                                                    <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition truncate">{t.name}</p>
-                                                    <p className="text-[10px] text-slate-450 truncate font-mono">No. Anggota: {t.skNumber}</p>
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     )}
                 </div>
@@ -320,7 +373,7 @@ export default function Home() {
 
             {/* Footer */}
             <footer className="py-6 px-6 border-t border-slate-900 text-center text-xs text-slate-500 z-10 bg-slate-950/40">
-                &copy; {new Date().getFullYear()} DocVerify IPPTI. Keamanan Terjemahan Tersumpah Resmi.
+                &copy; {new Date().getFullYear()} {t.footer}
             </footer>
         </div>
     );
