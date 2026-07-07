@@ -12,8 +12,8 @@ type LangType = 'id' | 'en' | 'zh' | 'ar';
 const translations = {
     id: {
         title_doc: "Portal Validasi Resmi Dokumen",
-        hero_title_doc: "Kepercayaan Berlandaskan Bukti Kriptografis.",
-        hero_desc_doc: "Verifikasi pendaftaran dan keaslian dokumen terjemahan tersumpah Anda secara instan.",
+        hero_title_doc: "Cari Nomor Registrasi",
+        hero_desc_doc: "",
         tab_reg: "Nomor Registrasi",
         tab_qr: "Pindai QR",
         label_reg: "Nomor Registrasi atau 8-Karakter ID Dokumen",
@@ -33,8 +33,8 @@ const translations = {
     },
     en: {
         title_doc: "Official Document Validation Portal",
-        hero_title_doc: "Trust Built on Cryptographic Proof.",
-        hero_desc_doc: "Verify the registration and authenticity of your sworn translation documents instantly.",
+        hero_title_doc: "Search a Registration Number",
+        hero_desc_doc: "",
         tab_reg: "Registration Number",
         tab_qr: "Scan QR",
         label_reg: "Registration Number or 8-Character Document ID",
@@ -54,8 +54,8 @@ const translations = {
     },
     zh: {
         title_doc: "官方文件验证门户",
-        hero_title_doc: "基于密码学证明的信任。",
-        hero_desc_doc: "即时验证您的宣誓翻译文件的注册信息和真实性。",
+        hero_title_doc: "搜索注册编号",
+        hero_desc_doc: "",
         tab_reg: "注册编号",
         tab_qr: "扫描二维码",
         label_reg: "注册编号或8位文件 ID",
@@ -75,8 +75,8 @@ const translations = {
     },
     ar: {
         title_doc: "البوابة الرسمية للتحقق من المستندات",
-        hero_title_doc: "ثقة مبنية على إثباتات تشفيرية.",
-        hero_desc_doc: "تحقق من تسجيل وصحة مستندات الترجمة المحلفة الخاصة بك فوراً.",
+        hero_title_doc: "البحث عن رقم التسجيل",
+        hero_desc_doc: "",
         tab_reg: "رقم التسجيل",
         tab_qr: "مسح رمز QR",
         label_reg: "رقم التسجيل أو معرف مستند من 8 أحرف",
@@ -193,30 +193,30 @@ export default function Home() {
     const isRtl = lang === 'ar';
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between relative overflow-hidden selection:bg-emerald-500 selection:text-slate-950" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-slate-50 text-blue-950 flex flex-col justify-between relative overflow-hidden selection:bg-blue-500/20 selection:text-blue-950" dir={isRtl ? 'rtl' : 'ltr'}>
             {/* Background blur blobs */}
-            <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-emerald-500/5 rounded-full filter blur-[120px] animate-blob"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] bg-blue-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000"></div>
+            <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-500/10 rounded-full filter blur-[120px] animate-blob"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] bg-indigo-500/10 rounded-full filter blur-[120px] animate-blob animation-delay-2000"></div>
 
             {/* Header */}
-            <header className="py-6 px-6 md:px-12 border-b border-slate-900 bg-slate-950/60 backdrop-blur-xl flex items-center justify-between z-10">
+            <header className="py-6 px-6 md:px-12 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl flex items-center justify-between z-10">
                 <Link href="/" className="flex items-center gap-3">
                     <img src="/ippti-logo.jpg" alt="IPPTI Logo" className="h-9 w-auto rounded bg-white p-0.5 object-contain shadow-md" />
-                    <span className="text-xl font-bold tracking-tight text-white">DocVerify</span>
+                    <span className="text-xl font-bold tracking-tight text-blue-950">DocVerify</span>
                 </Link>
                 
                 <div className="flex items-center gap-4">
-                    <Link href="/verify-translator" className="text-sm font-semibold text-emerald-400 hover:text-emerald-350 hover:underline transition-all duration-200">
+                    <Link href="/verify-translator" className="text-sm font-semibold text-blue-900 hover:text-blue-950 hover:underline transition-all duration-200">
                         {t.nav_verify_trans}
                     </Link>
                     
                     {/* Language Switcher */}
-                    <div className="flex bg-slate-900 p-0.5 rounded-lg border border-slate-800 dir-ltr" dir="ltr">
+                    <div className="flex bg-slate-200/60 p-0.5 rounded-lg border border-slate-200 dir-ltr" dir="ltr">
                         {(['id', 'en', 'zh', 'ar'] as LangType[]).map((l) => (
                             <button
                                 key={l}
                                 onClick={() => changeLanguage(l)}
-                                className={`px-2 py-1 rounded text-[10px] font-extrabold tracking-wider transition cursor-pointer ${lang === l ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-250'}`}
+                                className={`px-2 py-1 rounded text-[10px] font-extrabold tracking-wider transition cursor-pointer ${lang === l ? 'bg-blue-950 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}
                             >
                                 {l.toUpperCase()}
                             </button>
@@ -228,62 +228,30 @@ export default function Home() {
             {/* Main Area */}
             <main className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 z-10 max-w-4xl mx-auto w-full">
                 <div className="text-center space-y-6 mb-12">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold tracking-wide uppercase">
-                        <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-800 text-xs font-semibold tracking-wide uppercase">
+                        <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
                         {t.title_doc}
                     </div>
 
-                    <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                        {lang === 'id' ? (
-                            <>
-                                Kepercayaan Berlandaskan <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
-                                    Bukti Kriptografis.
-                                </span>
-                            </>
-                        ) : lang === 'en' ? (
-                            <>
-                                Trust Built on <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
-                                    Cryptographic Proof.
-                                </span>
-                            </>
-                        ) : lang === 'zh' ? (
-                            <>
-                                基于密码学证明的 <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
-                                    信任。
-                                </span>
-                            </>
-                        ) : (
-                            <>
-                                الثقة المبنية على <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400">
-                                    إثباتات تشفيرية.
-                                </span>
-                            </>
-                        )}
+                    <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-blue-950 leading-tight">
+                        {t.hero_title_doc}
                     </h1>
-
-                    <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
-                        {t.hero_desc_doc}
-                    </p>
                 </div>
 
                 {/* Tab Container */}
-                <div className="w-full max-w-md bg-slate-900/80 backdrop-blur-2xl border border-slate-800/80 rounded-2xl shadow-2xl p-6 sm:p-8">
+                <div className="w-full max-w-md bg-white border border-slate-200/80 rounded-2xl shadow-xl p-6 sm:p-8">
                     {/* Tabs */}
-                    <div className="flex border-b border-slate-800 pb-3.5 mb-6 overflow-x-auto gap-2 scrollbar-none">
+                    <div className="flex border-b border-slate-200 pb-3.5 mb-6 overflow-x-auto gap-2 scrollbar-none">
                         <button
                             onClick={() => { setActiveTab('search'); setError(null); }}
-                            className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'search' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                            className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'search' ? 'border-blue-950 text-blue-950' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
                         >
                             <Search className="w-3.5 h-3.5" />
                             <span>{t.tab_reg}</span>
                         </button>
                         <button
                             onClick={() => { setActiveTab('scan'); setError(null); }}
-                            className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'scan' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+                            className={`flex-1 flex items-center justify-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all duration-200 cursor-pointer flex-shrink-0 whitespace-nowrap ${activeTab === 'scan' ? 'border-blue-950 text-blue-950' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
                         >
                             <QrCode className="w-3.5 h-3.5" />
                             <span>{t.tab_qr}</span>
@@ -291,7 +259,7 @@ export default function Home() {
                     </div>
 
                     {error && (
-                        <div className="flex items-start gap-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 p-3.5 rounded-xl text-sm font-medium mb-5">
+                        <div className="flex items-start gap-2.5 bg-rose-50 border border-rose-100 text-rose-700 p-3.5 rounded-xl text-sm font-medium mb-5">
                             <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                             <span className="leading-snug">{error}</span>
                         </div>
@@ -301,7 +269,7 @@ export default function Home() {
                     {activeTab === 'search' && (
                         <form onSubmit={handleSearchSubmit} className="space-y-4">
                             <div>
-                                <label htmlFor="search-input" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">
+                                <label htmlFor="search-input" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2.5">
                                     {t.label_reg}
                                 </label>
                                 <div className="relative">
@@ -312,12 +280,12 @@ export default function Home() {
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         placeholder={t.placeholder_reg}
-                                        className="w-full pl-4 pr-12 py-3.5 border border-slate-800 rounded-xl bg-slate-950/60 text-white placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 text-sm font-semibold uppercase tracking-wide transition-all duration-200"
+                                        className="w-full pl-4 pr-12 py-3.5 border border-slate-200 rounded-xl bg-slate-50 text-blue-950 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-950/20 focus:border-blue-950 text-sm font-semibold uppercase tracking-wide transition-all duration-200"
                                     />
                                     <button
                                         type="submit"
                                         disabled={isPending}
-                                        className={`absolute ${isRtl ? 'left-2' : 'right-2'} top-1/2 -translate-y-1/2 p-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 text-white rounded-lg transition-all duration-200 disabled:opacity-50 cursor-pointer shadow-md`}
+                                        className={`absolute ${isRtl ? 'left-2' : 'right-2'} top-1/2 -translate-y-1/2 p-2 bg-blue-950 hover:bg-blue-900 disabled:bg-slate-200 text-white rounded-lg transition-all duration-200 disabled:opacity-50 cursor-pointer shadow-md`}
                                     >
                                         {isPending ? (
                                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -348,17 +316,17 @@ export default function Home() {
                             
                             <label
                                 htmlFor="qr-camera-input"
-                                className={`flex flex-col items-center justify-center p-8 border border-dashed border-slate-800 hover:border-emerald-500 rounded-xl bg-slate-950/30 cursor-pointer transition-all duration-300 group ${scanLoading ? 'opacity-50 pointer-events-none' : ''}`}
+                                className={`flex flex-col items-center justify-center p-8 border border-dashed border-slate-200 hover:border-blue-950 rounded-xl bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all duration-300 group ${scanLoading ? 'opacity-50 pointer-events-none' : ''}`}
                             >
                                 {scanLoading ? (
-                                    <Loader2 className="w-10 h-10 text-emerald-400 animate-spin mb-4" />
+                                    <Loader2 className="w-10 h-10 text-blue-950 animate-spin mb-4" />
                                 ) : (
-                                    <Camera className="w-10 h-10 text-slate-500 group-hover:text-emerald-400 transition-colors duration-200 mb-4" />
+                                    <Camera className="w-10 h-10 text-slate-400 group-hover:text-blue-950 transition-colors duration-200 mb-4" />
                                 )}
-                                <span className="text-sm font-semibold text-slate-200 group-hover:text-emerald-400 transition-colors duration-200">
+                                <span className="text-sm font-semibold text-slate-700 group-hover:text-blue-950 transition-colors duration-200">
                                     {scanLoading ? t.scan_loading : t.upload_qr}
                                 </span>
-                                <span className="text-xs text-slate-500 mt-1.5">
+                                <span className="text-xs text-slate-400 mt-1.5">
                                     {t.upload_qr_desc}
                                 </span>
                             </label>
@@ -372,7 +340,7 @@ export default function Home() {
             </main>
 
             {/* Footer */}
-            <footer className="py-6 px-6 border-t border-slate-900 text-center text-xs text-slate-500 z-10 bg-slate-950/40">
+            <footer className="py-6 px-6 border-t border-slate-200/80 text-center text-xs text-slate-500 z-10 bg-white/70">
                 &copy; {new Date().getFullYear()} {t.footer}
             </footer>
         </div>
