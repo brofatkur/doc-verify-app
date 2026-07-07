@@ -288,6 +288,7 @@ export default function TranslatorManager({ initialTranslators }: { initialTrans
                                     className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer"
                                 >
                                     <option value="TRANSLATOR">Penerjemah Tersumpah</option>
+                                    <option value="ADMIN">Pengurus IPPTI (Admin)</option>
                                     <option value="SUPERADMIN">Pengurus IPPTI (Super Admin)</option>
                                 </select>
                             </div>

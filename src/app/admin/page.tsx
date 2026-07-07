@@ -75,9 +75,6 @@ export default async function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Roster of Sworn Translators */}
-                <TranslatorManager initialTranslators={translators} />
-
                 {/* Audit Logs */}
                 <div className="space-y-4 pt-2">
                     <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
