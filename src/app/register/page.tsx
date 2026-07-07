@@ -19,6 +19,7 @@ export default function RegisterPage() {
     const [skNumber, setSkNumber] = useState('')
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
+    const [whatsapp, setWhatsapp] = useState('')
     const [isSearchingMember, setIsSearchingMember] = useState(false)
     const [isMemberFound, setIsMemberFound] = useState(false)
 
@@ -35,6 +36,7 @@ export default function RegisterPage() {
             if (res.success && res.translator) {
                 setName(res.translator.name)
                 setEmail(res.translator.email || '')
+                setWhatsapp(res.translator.whatsapp || '')
                 setIsMemberFound(true)
                 setSuccessMsg(`Data Terintegrasi! Profil "${res.translator.name}" berhasil dimuat otomatis. Silakan lengkapi email & password Anda.`);
             } else {
@@ -186,6 +188,23 @@ export default function RegisterPage() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="appearance-none block w-full px-3.5 py-2.5 border border-slate-800 rounded-xl bg-slate-950/60 placeholder-slate-655 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 text-sm font-semibold transition-all duration-200"
                                     placeholder="penerjemah@example.com"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="whatsapp" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                Nomor WhatsApp
+                            </label>
+                            <div className="mt-1">
+                                <input
+                                    id="whatsapp"
+                                    name="whatsapp"
+                                    type="text"
+                                    value={whatsapp}
+                                    onChange={(e) => setWhatsapp(e.target.value)}
+                                    className="appearance-none block w-full px-3.5 py-2.5 border border-slate-800 rounded-xl bg-slate-950/60 placeholder-slate-655 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 text-sm font-semibold transition-all duration-200"
+                                    placeholder="Contoh: 081234567890"
                                 />
                             </div>
                         </div>

@@ -16,6 +16,7 @@ model User {
   name             String
   skNumber         String
   role             String     @default("TRANSLATOR")
+  whatsapp         String?
   languageServices String?
   bio              String?
   profilePicture   String?

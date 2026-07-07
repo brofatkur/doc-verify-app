@@ -54,6 +54,7 @@ export async function findTranslatorByMemberNo(memberNo: string) {
                 translator: {
                     name: user.name,
                     email: user.email.endsWith('@ippti.or.id') ? '' : user.email,
+                    whatsapp: user.whatsapp || '',
                 }
             }
         }
@@ -69,6 +70,7 @@ export async function registerTranslator(formData: FormData) {
     const password = formData.get('password') as string
     const name = formData.get('name') as string
     const skNumber = formData.get('skNumber') as string
+    const whatsapp = formData.get('whatsapp') as string
 
     if (!email || !password || !name || !skNumber) {
         return { success: false, error: 'Semua kolom wajib diisi.' }
@@ -98,7 +100,8 @@ export async function registerTranslator(formData: FormData) {
                 data: {
                     email,
                     password: hashedPassword,
-                    name
+                    name,
+                    whatsapp: whatsapp || null
                 }
             })
         } else {
@@ -109,7 +112,8 @@ export async function registerTranslator(formData: FormData) {
                     password: hashedPassword,
                     name,
                     skNumber,
-                    role: 'TRANSLATOR'
+                    role: 'TRANSLATOR',
+                    whatsapp: whatsapp || null
                 }
             })
         }
