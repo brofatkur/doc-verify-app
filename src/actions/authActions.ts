@@ -223,6 +223,10 @@ export async function forgotPassword(email: string) {
             return { success: true, message: 'Jika email terdaftar, instruksi reset password telah dikirim.' }
         }
 
+        if (user.email.endsWith('@ippti.or.id')) {
+            return { success: false, error: 'Akun Anda belum diklaim/diaktifkan. Silakan lakukan pendaftaran terlebih dahulu menggunakan Nomor Anggota Anda.' }
+        }
+
         const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
         const expiresAt = new Date(Date.now() + 3600000) // 1 hour expiry
 
