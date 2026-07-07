@@ -38,7 +38,7 @@ const translations = {
         masked_name: "Nama di Dokumen (Disamarkan)",
         lang_pair: "Pasangan Bahasa",
         doc_type: "Tipe Dokumen",
-        translator: "Penerjemah Tersumpah",
+        translator: "Nama Penerjemah Tersumpah",
         member_id: "No. Anggota: ",
         services: "Layanan Bahasa:",
         bio: "Biografi:",
@@ -56,7 +56,7 @@ const translations = {
         masked_name: "Name on Document (Masked)",
         lang_pair: "Language Pair",
         doc_type: "Document Type",
-        translator: "Sworn Translator",
+        translator: "Name of Sworn Translator",
         member_id: "Member ID: ",
         services: "Language Services:",
         bio: "Biography:",
@@ -74,7 +74,7 @@ const translations = {
         masked_name: "文件姓名（已遮蔽）",
         lang_pair: "语言对",
         doc_type: "文件类型",
-        translator: "宣誓翻译员",
+        translator: "宣誓翻译员姓名",
         member_id: "成员 ID: ",
         services: "语言服务:",
         bio: "个人简介:",
@@ -92,7 +92,7 @@ const translations = {
         masked_name: "الاسم على المستند (مخفي)",
         lang_pair: "زوج اللغات",
         doc_type: "نوع المستند",
-        translator: "مترجم محلف",
+        translator: "اسم المترجم المحلف",
         member_id: "رقم العضوية: ",
         services: "خدمات اللغة:",
         bio: "السيرة الذاتية:",
@@ -191,19 +191,11 @@ export default function DocumentDetailCard({ document }: { document: Document })
 
             {/* Details list */}
             <div className="p-6 sm:p-8 space-y-6 text-left">
-                <div className={`flex flex-col sm:flex-row gap-4 border-b border-slate-100 pb-6 ${isRtl ? 'text-right' : 'text-left'}`}>
-                    <div className="flex-1">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                            {t.doc_id}
-                        </p>
-                        <p className="text-lg font-mono font-bold text-slate-900">{document.documentId}</p>
-                    </div>
-                    <div className="flex-1">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                            {t.reg_no}
-                        </p>
-                        <p className="text-base font-bold text-slate-800 font-mono">{document.registrationNumber}</p>
-                    </div>
+                <div className={`border-b border-slate-100 pb-6 ${isRtl ? 'text-right' : 'text-left'}`}>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                        {t.reg_no}
+                    </p>
+                    <p className="text-lg font-bold text-slate-900 font-mono">{document.registrationNumber}</p>
                 </div>
 
                 <div className={`grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4 ${isRtl ? 'text-right' : 'text-left'}`}>
@@ -274,14 +266,7 @@ export default function DocumentDetailCard({ document }: { document: Document })
                                     </p>
                                 </div>
                             </div>
-                            {document.translator.languageServices && (
-                                <div className="text-xs border-t border-slate-100/85 pt-3">
-                                    <span className="font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                                        {t.services}
-                                    </span>
-                                    <p className="text-slate-700 font-semibold">{document.translator.languageServices}</p>
-                                </div>
-                            )}
+
                             {document.translator.bio && (
                                 <div className="text-xs border-t border-slate-100/85 pt-3">
                                     <span className="font-bold text-slate-400 uppercase tracking-wider block mb-1">
